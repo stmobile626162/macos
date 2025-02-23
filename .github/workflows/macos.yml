@@ -1,0 +1,20 @@
+name: iOS Build  
+on: [push, pull_request]  
+
+jobs:  
+  build:  
+    runs-on: macos-latest  
+    steps:  
+      - name: Checkout Code  
+        uses: actions/checkout@v4  
+
+      - name: Set Up Xcode  
+        run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer  
+
+      - name: Install Dependencies  
+        run: |
+          brew install cocoapods  
+          pod install --project-directory=ios  
+
+      - name: Build iOS App  
+        run: xcodebuild -workspace ios/MyApp.xcworkspace -scheme MyApp -sdk iphoneos -configuration Release  
