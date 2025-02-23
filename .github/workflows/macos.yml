@@ -11,10 +11,11 @@ jobs:
       - name: Set Up Xcode  
         run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer  
 
-      - name: Install Dependencies  
+      - name: Install Node & Dependencies  
         run: |
-          brew install cocoapods  
-          pod install --project-directory=ios  
+          npm install
+          cd ios
+          pod install  
 
       - name: Build iOS App  
         run: xcodebuild -workspace ios/MyApp.xcworkspace -scheme MyApp -sdk iphoneos -configuration Release  
