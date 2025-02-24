@@ -37,3 +37,13 @@ jobs:
             -sdk iphonesimulator \
             -configuration Release \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive iOS app (For Deployment)
+        run: |
+          cd ios
+          xcodebuild -workspace MyNewProject.xcworkspace \
+            -scheme MyNewProject \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath build/MyNewProject.xcarchive \
+            archive
