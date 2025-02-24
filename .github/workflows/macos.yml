@@ -48,3 +48,17 @@ jobs:
             -archivePath build/MyNewProject.xcarchive \
             archive \
             CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+      - name: Export .ipa File
+        run: |
+          cd ios
+          xcodebuild -exportArchive \
+            -archivePath build/MyNewProject.xcarchive \
+            -exportPath build/output \
+            -exportOptionsPlist exportOptions.plist
+
+      - name: Upload .ipa Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyNewProject-ipa
+          path: ios/build/output/MyNewProject.ipa
