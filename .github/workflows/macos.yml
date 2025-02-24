@@ -29,7 +29,11 @@ jobs:
           cd ios
           pod install
 
-      - name: Build iOS app
-        run: |
-          cd ios
-          xcodebuild -workspace MyNewProject.xcworkspace -scheme MyNewProject -sdk iphoneos -configuration Release build
+      - name: Build iOS app (Simulator)
+  run: |
+    cd ios
+    xcodebuild -workspace MyNewProject.xcworkspace \
+      -scheme MyNewProject \
+      -sdk iphonesimulator \
+      -configuration Release \
+      CODE_SIGNING_ALLOWED=NO
