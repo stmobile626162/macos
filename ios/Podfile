@@ -3,11 +3,14 @@
 require Pod::Executable.execute_command('node', ['-p',
 =======
 require_relative '../node_modules/react-native/scripts/react_native_pods'
+<<<<<<< HEAD
 >>>>>>> 5037e359a8d5bb4e2eb99b30b3a392e2aeeaa2a0
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
     {paths: [process.argv[1]]},
   )', __dir__]).strip
+=======
+>>>>>>> 01a3f111d4c3a7f41e200c60c3aad58c262536bd
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
