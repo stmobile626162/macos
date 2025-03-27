@@ -1,10 +1,7 @@
-name: Build iOS App
+name: iOS Build and Upload
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -13,52 +10,53 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install
-
-      - name: Build iOS app (Simulator)
-        run: |
-          cd ios
-          xcodebuild -workspace MyNewProject.xcworkspace \
-            -scheme MyNewProject \
-            -sdk iphonesimulator \
-            -configuration Release \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Archive iOS app (For Deployment)
-        run: |
-          cd ios
-          xcodebuild -workspace MyNewProject.xcworkspace \
-            -scheme MyNewProject \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath build/MyNewProject.xcarchive \
-            archive \
-            CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-
-      - name: Export .ipa File
-        run: |
-          cd ios
-          xcodebuild -exportArchive \
-            -archivePath build/MyNewProject.xcarchive \
-            -exportPath build/output \
-            -exportOptionsPlist exportOptions.plist
-
-      - name: Upload .ipa Artifact
-        uses: actions/upload-artifact@v4
+      - name: Set Up Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          name: MyNewProject-ipa
-          path: ios/build/output/MyNewProject.ipa
+          ruby-version: '3.0'
+
+      - name: Install Fastlane
+        run: |
+          sudo gem install fastlane
+          cd ios && fastlane --version
+
+      - name: Decode Certificates
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+          echo "$APPLE_PROVISIONING_PROFILE" | base64 --decode > ProjectAppStoreProfile.mobileprovision
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp ProjectAppStoreProfile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Install Dependencies
+        run: bundle install
+
+      - name: Build iOS App
+        run: fastlane ios build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: iOS-App
+          path: output/*.ipa
+
+      - name: Upload to App Store
+        env:
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: fastlane ios upload

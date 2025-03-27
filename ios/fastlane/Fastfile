@@ -1,0 +1,19 @@
+platform :ios do
+    lane :deploy do
+      gym(
+        workspace: "MyNewProject.xcworkspace", # Removed "ios/" prefix (already in ios directory)
+        scheme: "Project",
+        export_options: "exportOptions.plist.plist", # Added missing comma
+        export_method: "app-store", # Optional: Remove if defined in exportOptions.plist
+        output_directory: "./build",
+        output_name: "Project.ipa"
+      )
+      deliver(
+        ipa: "./build/Project.ipa",
+        skip_screenshots: true,
+        skip_metadata: true,
+        submit_for_review: false,
+        force: true
+      )
+    end
+end
