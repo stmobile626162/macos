@@ -44,6 +44,11 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp ProjectAppStoreProfile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
+      - name: Debug Certificate Decoding
+        run: |
+          ls -l certificate.p12
+          file certificate.p12
+
       - name: Install Dependencies
         run: bundle install
 
